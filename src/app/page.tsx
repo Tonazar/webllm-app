@@ -2,10 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CreateMLCEngine } from "@mlc-ai/web-llm";
+import {
+  CreateMLCEngine,
+  ChatCompletionChunk,
+  ChatCompletionMessageParam,
+} from "@mlc-ai/web-llm";
 
 export default function Home() {
-  const [engine, setEngine] = useState<any>(null);
+  const [engine, setEngine] = useState<Awaited<
+    ReturnType<typeof CreateMLCEngine>
+  > | null>(null);
   const [input, setInput] = useState("");
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,14 +21,14 @@ export default function Home() {
     async function loadModel() {
       const selectedModel = "Llama-3.1-8B-Instruct-q4f32_1-MLC";
 
-      const engine = await CreateMLCEngine(selectedModel, {
+      const loadedEngine = await CreateMLCEngine(selectedModel, {
         initProgressCallback: (progress) => {
           setLoadingStatus(progress.text);
         },
       });
 
       console.log("[WebLLM] Engine initialized ✅");
-      setEngine(engine);
+      setEngine(loadedEngine);
     }
 
     loadModel();
@@ -31,9 +37,9 @@ export default function Home() {
   const handleSubmit = async () => {
     if (!engine || !input) return;
     setLoading(true);
-    setResponse(""); // clear previous response
+    setResponse("");
 
-    const messages = [
+    const messages: ChatCompletionMessageParam[] = [
       { role: "system", content: "You are a helpful assistant." },
       { role: "user", content: input },
     ];
@@ -45,11 +51,9 @@ export default function Home() {
         stream_options: { include_usage: true },
       });
 
-      let reply = "";
-      for await (const chunk of chunks) {
+      for await (const chunk of chunks as AsyncGenerator<ChatCompletionChunk>) {
         const delta = chunk.choices[0]?.delta?.content || "";
-        reply += delta;
-        setResponse((prev) => prev + delta); // progressively update UI
+        setResponse((prev) => prev + delta);
       }
     } catch (err) {
       console.error("❌ Streaming error:", err);
@@ -60,28 +64,31 @@ export default function Home() {
   };
 
   return (
-    <>
-      {!engine && <p className="text-sm text-gray-500">{loadingStatus}</p>}
-      <main className="container mx-auto p-4 flex flex-col items-center">
-        <h1 className="text-2xl font-bold">🧠 WebLLM (Llama 3)</h1>
+    <main className="container mx-auto p-4 flex flex-col items-center">
+      {!engine && (
+        <p className="text-sm text-gray-500 mb-4">
+          {loadingStatus || "Loading model..."}
+        </p>
+      )}
 
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask something..."
-          className="w-full h-24 p-2 border rounded"
-        />
+      <h1 className="text-2xl font-bold">🧠 WebLLM (Llama 3)</h1>
 
-        <Button onClick={handleSubmit} disabled={loading}>
-          {loading ? "Thinking..." : "Submit"}
-        </Button>
+      <textarea
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Ask something..."
+        className="w-full h-24 p-2 border rounded my-4"
+      />
 
-        {response && (
-          <div className="mt-4 p-3 border rounded bg-gray-100 whitespace-pre-wrap">
-            {response}
-          </div>
-        )}
-      </main>
-    </>
+      <Button onClick={handleSubmit} disabled={loading}>
+        {loading ? "Thinking..." : "Submit"}
+      </Button>
+
+      {response && (
+        <div className="mt-4 p-3 border rounded bg-gray-100 whitespace-pre-wrap w-full">
+          {response}
+        </div>
+      )}
+    </main>
   );
 }
