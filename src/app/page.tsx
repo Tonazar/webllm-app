@@ -4,14 +4,12 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   CreateMLCEngine,
-  ChatCompletionChunk,
   ChatCompletionMessageParam,
+  MLCEngine,
 } from "@mlc-ai/web-llm";
 
 export default function Home() {
-  const [engine, setEngine] = useState<Awaited<
-    ReturnType<typeof CreateMLCEngine>
-  > | null>(null);
+  const [engine, setEngine] = useState<MLCEngine | null>(null);
   const [input, setInput] = useState("");
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,8 +49,8 @@ export default function Home() {
         stream_options: { include_usage: true },
       });
 
-      for await (const chunk of chunks as AsyncGenerator<ChatCompletionChunk>) {
-        const delta = chunk.choices[0]?.delta?.content || "";
+      for await (const chunk of chunks) {
+        const delta = chunk.choices[0]?.delta?.content ?? "";
         setResponse((prev) => prev + delta);
       }
     } catch (err) {
