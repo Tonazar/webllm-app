@@ -6,6 +6,7 @@ import {
   CreateMLCEngine,
   ChatCompletionMessageParam,
   MLCEngine,
+  ChatCompletionChunk,
 } from "@mlc-ai/web-llm";
 
 export default function Home() {
@@ -20,7 +21,7 @@ export default function Home() {
       const selectedModel = "Llama-3.1-8B-Instruct-q4f32_1-MLC";
 
       const loadedEngine = await CreateMLCEngine(selectedModel, {
-        initProgressCallback: (progress) => {
+        initProgressCallback: (progress: { text: string }) => {
           setLoadingStatus(progress.text);
         },
       });
@@ -43,18 +44,19 @@ export default function Home() {
     ];
 
     try {
-      const chunks = await engine.chat.completions.create({
-        messages,
-        stream: true,
-        stream_options: { include_usage: true },
-      });
+      const chunks: AsyncGenerator<ChatCompletionChunk> =
+        await engine.chat.completions.create({
+          messages,
+          stream: true,
+          stream_options: { include_usage: true },
+        });
 
       for await (const chunk of chunks) {
         const delta = chunk.choices[0]?.delta?.content ?? "";
         setResponse((prev) => prev + delta);
       }
-    } catch (err) {
-      console.error("❌ Streaming error:", err);
+    } catch (error: unknown) {
+      console.error("❌ Streaming error:", error);
       setResponse("⚠️ Error streaming response.");
     }
 
