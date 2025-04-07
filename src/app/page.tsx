@@ -72,7 +72,7 @@ export default function Home() {
         </p>
       )}
 
-      <h1 className="text-2xl font-bold"> WebLLM (Llama 3)</h1>
+      <h1 className="text-2xl font-bold">🦙 WebLLM (Llama-3)</h1>
 
       <textarea
         value={input}
