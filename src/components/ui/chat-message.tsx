@@ -1,13 +1,13 @@
-import { motion } from "framer-motion";
+import { motion, AnimationProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { User, Bot } from "lucide-react";
 
 interface ChatMessageProps {
   content: string;
   isUser: boolean;
-  animate?: any;
-  initial?: any;
-  exit?: any;
+  animate?: AnimationProps["animate"];
+  initial?: AnimationProps["initial"];
+  exit?: AnimationProps["exit"];
 }
 
 export function ChatMessage({

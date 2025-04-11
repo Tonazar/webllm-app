@@ -1,21 +1,17 @@
 import { motion } from "framer-motion";
 
-export function LoadingDots() {
+interface LoadingDotsProps {
+  className?: string;
+}
+
+export function LoadingDots({ className }: LoadingDotsProps) {
   return (
-    <div className="flex space-x-1.5 items-center h-4">
-      {[1, 2, 3].map((i) => (
-        <motion.div
-          key={i}
-          initial={{ scale: 0.8 }}
-          animate={{ scale: [0.8, 1.2, 0.8] }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            delay: i * 0.2,
-          }}
-          className="w-1.5 h-1.5 rounded-full bg-zinc-400"
-        />
-      ))}
+    <div className={className}>
+      <div className="flex space-x-1">
+        <div className="w-2 h-2 bg-current rounded-full animate-[bounce_1s_infinite_100ms]" />
+        <div className="w-2 h-2 bg-current rounded-full animate-[bounce_1s_infinite_200ms]" />
+        <div className="w-2 h-2 bg-current rounded-full animate-[bounce_1s_infinite_300ms]" />
+      </div>
     </div>
   );
 }
