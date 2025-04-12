@@ -44,7 +44,7 @@ export default function Home() {
 
   useEffect(() => {
     async function loadModel() {
-      const selectedModel = "Llama-3.1-8B-Instruct-q4f32_1-MLC";
+      const selectedModel = "TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC";
       const loadedEngine = await CreateMLCEngine(selectedModel, {
         initProgressCallback: (progress: { text: string }) => {
           setLoadingStatus(progress.text);
